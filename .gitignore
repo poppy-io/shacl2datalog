@@ -1,0 +1,10 @@
+# Contains outputs
+target/
+
+# Emacs
+*~
+\#*\#
+
+# Direnv
+.direnv/
+.envrc
