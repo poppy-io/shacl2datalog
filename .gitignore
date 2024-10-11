@@ -8,3 +8,8 @@ target/
 # Direnv
 .direnv/
 .envrc
+
+
+# Added by cargo
+
+/target
