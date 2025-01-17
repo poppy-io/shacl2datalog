@@ -1,6 +1,6 @@
 {
   # Poorly adapted from uv2nix hello world example
-  description = "Devshell flake for shaclog";
+  description = "Devshell flake for shacl2datalog";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -89,7 +89,7 @@
       # Package a virtual environment as our main application.
       #
       # Enable no optional dependencies for production build.
-      packages.x86_64-linux.default = pythonSet.mkVirtualEnv "shaclog-env" workspace.deps.default;
+      packages.x86_64-linux.default = pythonSet.mkVirtualEnv "shacl2datalog-env" workspace.deps.default;
 
       # Make main runnable with `nix run`
       apps.x86_64-linux = {
@@ -121,7 +121,7 @@
 
                 # Apply fixups for building an editable package of your workspace packages
                 (final: prev: {
-                  shaclog = prev.shaclog.overrideAttrs (old: {
+                  shacl2datalog = prev.shacl2datalog.overrideAttrs (old: {
                     # It's a good idea to filter the sources going into an editable build
                     # so the editable package doesn't have to be rebuilt on every change.
                     src = lib.fileset.toSource {
@@ -129,7 +129,7 @@
                       fileset = lib.fileset.unions [
                         (old.src + "/pyproject.toml")
                         (old.src + "/README.md")
-                        (old.src + "/src/shaclog/__init__.py")
+                        (old.src + "/src/shacl2datalog/__init__.py")
                       ];
                     };
 
@@ -153,7 +153,7 @@
             # Build virtual environment, with local packages being editable.
             #
             # Enable all optional dependencies for development.
-            virtualenv = editablePythonSet.mkVirtualEnv "shaclog-dev-env" workspace.deps.all;
+            virtualenv = editablePythonSet.mkVirtualEnv "shacl2datalog-dev-env" workspace.deps.all;
 
           in
           pkgs.mkShell {

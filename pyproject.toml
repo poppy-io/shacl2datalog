@@ -1,5 +1,5 @@
 [project]
-name = "shaclog"
+name = "shacl2datalog"
 version = "0.1.0"
 description = "SHACL to Datalog transpiler"
 readme = "README.md"
@@ -9,7 +9,7 @@ dependencies = [
 ]
 
 [project.scripts]
-main = "shaclog:main"
+main = "shacl2datalog:main"
 
 [build-system]
 requires = ["hatchling"]
