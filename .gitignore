@@ -1,15 +1,6 @@
-# Contains outputs
-target/
-
-# Emacs
-*~
-\#*\#
-
 # Direnv
 .direnv/
 .envrc
 
-
-# Added by cargo
-
-/target
+# Pycharm
+.idea/
