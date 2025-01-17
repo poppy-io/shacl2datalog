@@ -1,0 +1,21 @@
+[project]
+name = "shaclog"
+version = "0.1.0"
+description = "SHACL to Datalog transpiler"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "urllib3>=2.2.3",
+]
+
+[project.scripts]
+main = "shaclog:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.6.7",
+]
