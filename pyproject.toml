@@ -5,6 +5,7 @@ description = "SHACL to Datalog transpiler"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "rdflib>=7.1.2",
 ]
 
 [project.scripts]
