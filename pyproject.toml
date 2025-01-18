@@ -9,7 +9,7 @@ dependencies = [
 ]
 
 [project.scripts]
-main = "shacl2datalog:main"
+main = "shacl2datalog:main.main"
 
 [build-system]
 requires = ["hatchling"]
