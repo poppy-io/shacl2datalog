@@ -3,7 +3,7 @@
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 
 # shacl2datalog
-Proof-of-concept SHACL to Datalog transpiler written in Python.
+Proof-of-concept SHACL to Clojure Datalog transpiler written in Python.
 
 ## Usage
 ```nix run```
