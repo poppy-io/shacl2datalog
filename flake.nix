@@ -99,14 +99,13 @@
         };
       };
 
-      devShells.x86_64-linux = {
+      devShell.x86_64-linux =
         # This devShell uses uv2nix to construct a virtual environment purely from Nix, using the same dependency specification as the application.
         # The notable difference is that we also apply another overlay here enabling editable mode ( https://setuptools.pypa.io/en/latest/userguide/development_mode.html ).
         #
         # This means that any changes done to your local files do not require a rebuild.
         #
         # Note: Editable package support is still unstable and subject to change.
-        uv2nix =
           let
             # Create an overlay enabling editable mode for all local dependencies.
             editableOverlay = workspace.mkEditablePyprojectOverlay {
@@ -182,5 +181,4 @@
             '';
           };
       };
-    };
 }
