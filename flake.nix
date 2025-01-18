@@ -1,5 +1,5 @@
 {
-  # Poorly adapted from uv2nix hello world example
+  # Poorly adapted from uv2nix hello world example.
   description = "Devshell flake for shacl2datalog";
 
   inputs = {
@@ -67,8 +67,8 @@
       # This example is only using x86_64-linux
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
 
-      # Use Python 3.14 from nixpkgs
-      python = pkgs.python314;
+      # Use Python 3.13 from nixpkgs
+      python = pkgs.python313;
 
       # Construct package set
       pythonSet =
