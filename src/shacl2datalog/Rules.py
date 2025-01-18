@@ -17,6 +17,14 @@ class Rules:
         self._rules: [Rule] = rules
 
     def write(self, path: str) -> None:
+        """
+        Writes rules to a given file.
+
+        If the file does not exist, it will be created. If it does, it will be overwritten.
+        @param path: Path to file to be written to.
+        """
         with open(path, 'w') as file:
             for rule in self._rules:
                 file.write(str(rule))
+
+        # TODO: handling of malformed path either here or in main

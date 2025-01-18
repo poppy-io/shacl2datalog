@@ -9,6 +9,8 @@ def read(path: str) -> Graph:
     """
 
     g = Graph()
+
+    # TODO: handling of malformed path either here or in main
     g.parse(path)
 
     # TODO: validate g
