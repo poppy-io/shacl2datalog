@@ -1,0 +1,14 @@
+name: Pylint
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ruff-action
+        uses: astral-sh/ruff-action@v3.0.1
+        with:
+          src: "./src"
+      - run: ruff check --fix
+      - run: ruff format
