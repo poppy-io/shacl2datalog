@@ -3,7 +3,7 @@
 class Rule:
     """Representation of a Datalog rule."""
 
-    def __init__(self, head: str, body: [str]):
+    def __init__(self, head: str, body: Set(str)):
         self.head = head
         self.body = body
 
@@ -17,8 +17,21 @@ class Rule:
 class Rules:
     """Container to hold a series of Rules with some convenience methods"""
 
-    def __init__(self, rules: [Rule] = None):
+    def __init__(self, rules: Set(Rule) = None):
         self._rules: [Rule] = rules
+
+    def __iadd__(self, other: Rule) -> Rules:
+        """
+        Augmented assignment to append a rule to the object
+        @param other: Rule to be appended
+        @return: self with other added
+        """
+        if self._rules:
+            self._rules += other
+        else:  # handle self._rules == None
+            self._rules = {other}
+
+        return self
 
     def write(self, path: str) -> None:
         """
@@ -28,6 +41,8 @@ class Rules:
         @param path: Path to file to be written to.
         """
         with open(path, "w", encoding="utf_8") as file:
+            # necessary for all time-related type handling, but may not be needed for all graphs
+            file.write("(require '[java-time.api :as jt])")
             for rule in self._rules:
                 file.write(str(rule))
 
