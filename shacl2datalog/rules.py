@@ -10,10 +10,10 @@ class Rule:
         self.body = body
 
     def __str__(self) -> str:
-        return "(<- " + self.head + "\n".join(self.body) + ")"
+        return self.head + " :- " + ", ".join(self.body) + "."
 
     def __repr__(self) -> str:
-        return "Rule(" + self.head + str(self.body) + ")"
+        return "Rule(" + self.head + ", " + str(self.body) + ")"
 
 
 class Rules:
@@ -43,8 +43,6 @@ class Rules:
         @param path: Path to file to be written to.
         """
         with open(path, "w", encoding="utf_8") as file:
-            # necessary for all time-related type handling, but may not be needed for all graphs
-            file.write("(require '[java-time.api :as jt])")
             for rule in self._rules:
                 file.write(str(rule))
 

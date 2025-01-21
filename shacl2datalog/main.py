@@ -1,6 +1,7 @@
 """Script allowing CLI usage of the library."""
 
-from rdflib import Graph
+import rdflib
+import pyshacl
 from .read import read
 from .rules import Rules
 from .translate import triple_to_rule
@@ -10,8 +11,9 @@ def main(*args, **kwargs) -> None:
     to a given filepath."""
 
     datalog: Rules = Rules()
-    shacl: Graph = read(args[0])
-    for triple in shacl:
-        datalog += triple_to_rule(triple)
+    graph: pyshacl.ShapesGraph = read(args[0])
+
+    for shape in graph.shapes():
+        datalog += shape_to_rule(shape)
 
     datalog.write(args[1])
