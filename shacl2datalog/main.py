@@ -1,6 +1,5 @@
 """Script allowing CLI usage of the library."""
 
-import rdflib
 import pyshacl
 from .read import read
 from .rules import Rules

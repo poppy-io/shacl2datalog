@@ -34,7 +34,7 @@ class Rule:
     def __hash__(self) -> int:
         return hash(self.__repr__())
 
-    def __eq__(self, other: Rule) -> bool:
+    def __eq__(self, other: Self) -> bool:
         return self.__repr__() == other.__repr__()
 
 
@@ -48,7 +48,7 @@ class Rules:
     def rules(self) -> set[Rule]:
         return self.rules
 
-    def __iadd__(self, other: Rule | Rules) -> Self:
+    def __iadd__(self, other: Rule | Self) -> Self:
         """
         Augmented assignment to append a rule to the object
         @param other: Rule to be appended

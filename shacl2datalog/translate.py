@@ -1,9 +1,8 @@
 """Function to translate a SHACL triple to a Datalog rule."""
 
-from .rules import Rule
+from .rules import Rule, Rules
 from rdflib import Node, URIRef, BNode, Literal
 from rdflib.namespace import XSD
-from decimal import Decimal
 from pyshacl import Shape
 
 
