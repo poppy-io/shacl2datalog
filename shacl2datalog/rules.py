@@ -6,14 +6,28 @@ class Rule:
     """Representation of a Datalog rule."""
 
     def __init__(self, head: str, body: set[str]):
-        self.head = head
-        self.body = body
+        self._head = head
+        self._body = body
+
+    @property
+    def head(self):
+        return self._head
+
+    @property
+    def body(self):
+        return self._body
 
     def __str__(self) -> str:
-        return self.head + " :- " + ", ".join(self.body) + "."
+        return self.__head + " :- " + ", ".join(self._body) + "."
 
     def __repr__(self) -> str:
-        return "Rule(" + self.head + ", " + str(self.body) + ")"
+        return "Rule(" + self._head + ", " + str(self._body) + ")"
+
+    def __hash__(self) -> int:
+        return hash(self.__repr__())
+
+    def __eq__(self, other: Rule) -> bool:
+        return self.__repr__() == other.__repr__()
 
 
 class Rules:
@@ -22,17 +36,27 @@ class Rules:
     def __init__(self, rules: set[Rule] = None) -> None:
         self._rules: set[Rule] = rules
 
-    def __iadd__(self, other: Rule) -> Self:
+    @property
+    def rules(self) -> set[Rule]:
+        return self.rules
+
+    def __iadd__(self, other: Rule | Rules) -> Self:
         """
         Augmented assignment to append a rule to the object
         @param other: Rule to be appended
         @return: self with other added
         """
-        if self._rules:
-            self._rules += other
-        else:  # handle self._rules == None
-            self._rules = {other}
-
+        match other:
+            case Rule():
+                if self._rules:
+                    self._rules.add(other)
+                else:  # handle self._rules == None
+                    self._rules = {other}
+            case Rules():
+                if self._rules:
+                    self._rules |= other
+                else:
+                    self._rules = other
         return self
 
     def write(self, path: str) -> None:
@@ -44,6 +68,6 @@ class Rules:
         """
         with open(path, "w", encoding="utf_8") as file:
             for rule in self._rules:
-                file.write(str(rule))
+                file.write(str(rule) + "\n")
 
         # TODO: handling of malformed path either here or in main

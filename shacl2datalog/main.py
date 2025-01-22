@@ -4,7 +4,7 @@ import rdflib
 import pyshacl
 from .read import read
 from .rules import Rules
-from .translate import triple_to_rule
+from .translate import shape_to_rules
 
 def main(*args, **kwargs) -> None:
     """Read a given SHACL file from a given path or URl and output equivalent Datalog rules
@@ -14,6 +14,6 @@ def main(*args, **kwargs) -> None:
     graph: pyshacl.ShapesGraph = read(args[0])
 
     for shape in graph.shapes():
-        datalog += shape_to_rule(shape)
+        datalog += shape_to_rules(shape)
 
     datalog.write(args[1])
