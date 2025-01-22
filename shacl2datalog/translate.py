@@ -4,16 +4,47 @@ from .rules import Rule
 from rdflib import Node, URIRef, BNode, Literal
 from rdflib.namespace import XSD
 from decimal import Decimal
+from pyshacl import Shape
 
 
-def triple_to_rule(triple: tuple[Node, Node, Node]) -> Rule:
+def shape_to_rules(shape: Shape) -> Rules:
     """
 
     @param triple: Triple to be translated
     @return: Equivalent Rule object
     """
-    subj, pred, obj = triple
-    ...
+    #TODO: implement deactivated shape handling
+    #TODO: implement shape severity
+    #TODO: implement shape messages
+
+    rules = Rules()
+    if shape.is_property_shape():
+        ...
+    else:
+        comments = ["Name(s): " + ", ".join(list(shape.name())),
+                    "Description(s): " + "; ".join(list(shape.description()))]
+        heads = targets_to_heads(*shape.target())
+        bodies = ...
+        for head in heads:
+            rules += Rule(comments, head, bodies)
+
+
+def targets_to_heads(target_nodes, target_classes, implicit_targets, target_objects_of,
+                     target_subjects_of) -> list[str]:
+    """
+
+    @param target_nodes:
+    @param target_classes:
+    @param implicit_targets:
+    @param target_objects_of:
+    @param target_subjects_of:
+    @return:
+    """
+    return (  [p[0].lower() + p[1:] for p in (str(t.toPython()) for t in target_nodes)]
+            + [p[0].lower() + p[1:] + "(X)" for p in (str(t.toPython()) for t in target_classes)]
+            + [p[0].lower() + p[1:] + "(X)" for p in (str(t.toPython()) for t in implicit_targets)]
+            + [p[0].lower() + p[1:] + "(_, X)" for p in (str(t.toPython()) for t in target_objects_of)]
+            + [p[0].lower() + p[1:] + "(X, _)" for p in (str(t.toPython()) for t in target_subjects_of)])
 
 
 def node_to_datalog(node: Node) -> str:

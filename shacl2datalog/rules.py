@@ -5,9 +5,14 @@ from typing import Self
 class Rule:
     """Representation of a Datalog rule."""
 
-    def __init__(self, head: str, body: set[str]):
+    def __init__(self, comments: list[str] = None, head: str = None, body: set[str] = None):
+        self._comments = comments
         self._head = head
         self._body = body
+
+    @property
+    def comments(self):
+        return self._comments
 
     @property
     def head(self):
@@ -18,10 +23,13 @@ class Rule:
         return self._body
 
     def __str__(self) -> str:
-        return self.__head + " :- " + ", ".join(self._body) + "."
+        return (("%" + "\n%".join(self._comments) + "\n") if self._comments else ""
+                + self._head + " :- "
+                + (",\n" + " " * (len(self._head) + len(" :- "))).join(self._body) # align body terms
+                + ".")
 
     def __repr__(self) -> str:
-        return "Rule(" + self._head + ", " + str(self._body) + ")"
+        return "Rule(" + str(self._comments) + ", " + self._head + ", " + str(self._body) + ")"
 
     def __hash__(self) -> int:
         return hash(self.__repr__())
