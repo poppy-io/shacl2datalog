@@ -41,8 +41,13 @@ class Rule:
 class Rules:
     """Container to hold a series of Rules with some convenience methods"""
 
-    def __init__(self, rules: set[Rule] = None) -> None:
+    def __init__(self, comments: list[str] = None, rules: set[Rule] = None) -> None:
+        self._comments = list[str] = comments
         self._rules: set[Rule] = rules
+
+    @property
+    def comments(self) -> list[str]:
+        return self._comments
 
     @property
     def rules(self) -> set[Rule]:

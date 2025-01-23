@@ -1,31 +1,42 @@
 """Function to translate a SHACL triple to a Datalog rule."""
 
 from .rules import Rule, Rules
+
 from rdflib import Node, URIRef, BNode, Literal
 from rdflib.namespace import XSD
-from pyshacl import Shape
+
+from pyshacl.shape import Shape
+from pyshacl.constraints import CONSTRAINT_PARAMETERS_MAP
+from pyshacl.constraints.constraint_component import ConstraintComponent
+from pyshacl.constraints.core import *
 
 
 def shape_to_rules(shape: Shape) -> Rules:
     """
 
-    @param triple: Triple to be translated
+    @param shape: Shape to be translated
     @return: Equivalent Rule object
     """
-    #TODO: implement deactivated shape handling
-    #TODO: implement shape severity
-    #TODO: implement shape messages
 
-    rules = Rules()
+    # TODO: implement deactivated shape handling
+    # TODO: implement shape severity
+    # TODO: implement shape messages
+
+    shape_comments = ["Name(s): " + ", ".join(list(shape.name())),
+                      "Description(s):"] + list(shape.description())
+    rules = Rules(shape_comments)
+
     if shape.is_property_shape():
         ...
     else:
-        comments = ["Name(s): " + ", ".join(list(shape.name())),
-                    "Description(s): " + "; ".join(list(shape.description()))]
         heads = targets_to_heads(*shape.target())
-        bodies = ...
+        constraints = [CONSTRAINT_PARAMETERS_MAP[p](shape) for p, _
+                       in shape.sg.predicate_objects(shape.node)]
+        bodies = set(constraint_to_body(constraints))
         for head in heads:
             rules += Rule(comments, head, bodies)
+
+    return rules
 
 
 def targets_to_heads(target_nodes, target_classes, implicit_targets, target_objects_of,
@@ -42,10 +53,105 @@ def targets_to_heads(target_nodes, target_classes, implicit_targets, target_obje
     return (  [p[0].lower() + p[1:] for p in (str(t.toPython()) for t in target_nodes)]
             + [p[0].lower() + p[1:] + "(X)" for p in (str(t.toPython()) for t in target_classes)]
             + [p[0].lower() + p[1:] + "(X)" for p in (str(t.toPython()) for t in implicit_targets)]
-            + [p[0].lower() + p[1:] + "(_, X)" for p in (str(t.toPython()) for t in target_objects_of)]
-            + [p[0].lower() + p[1:] + "(X, _)" for p in (str(t.toPython()) for t in target_subjects_of)])
+            + [p[0].lower() + p[1:] + "(_, X)" for p in (str(t.toPython()) for t in
+                                                         target_objects_of)]
+            + [p[0].lower() + p[1:] + "(X, _)" for p in (str(t.toPython()) for t in
+                                                         target_subjects_of)])
 
 
+def constraints_to_bodies(constraints: Iterable[ConstraintComponent]) -> Iterator[str]:
+    """
+
+    @param constraints:
+    @return:
+    """
+    for c in constraints:
+        match c:
+            # Cardinal constraints
+            case MinCountConstraintComponent():
+                min_count = int(c.min_count.value)
+                if min_count == 0:
+                    continue
+                ...
+            case MaxCountConstraintComponent():
+                max_count = int(c.max_count.value)
+                ...
+
+            # Logical constraints
+            case NotConstraintComponent():
+                for not_c in c.not_list:
+                    yield ...
+            case AndConstraintComponent():
+                for and_c in c.and_list:
+                    yield ...
+            case OrConstraintComponent():
+                for or_c in c.or_list:
+                    yield ...
+            case XoneConstraintComponent():
+                for xone_c in c.xone_nodes:
+                    yield ...
+
+            # Property pair constraints
+            case EqualsConstraintComponent():
+                ...
+            case DisjointConstraintComponent():
+                ...
+            case LessThanConstraintComponent():
+                ...
+            case LessThanOrEqualsConstraintComponent():
+                ...
+
+            # Shape-based constraints
+            case PropertyConstraintComponent():
+                ...
+            case NodeConstraintComponent():
+                ...
+            case QualifiedValueShapeConstraintComponent():
+                ...
+
+            # String-based constraints
+            case MinLengthConstraintComponent():
+                ...
+            case MaxLengthConstraintComponent():
+                ...
+            case PatternConstraintComponent():
+                ...
+            case LanguageInConstraintComponent():
+                ...
+            case UniqueLangConstraintComponent():
+                ...
+
+            # Value constraints
+            case ClassConstraintComponent():
+                ...
+            case DatatypeConstraintComponent():
+                ...
+            case NodeKindConstraintComponent():
+                ...
+
+            # Value range constraints
+            case MinExclusiveConstraintComponent():
+                ...
+            case MinInclusiveConstraintComponent():
+                ...
+            case MaxExclusiveConstraintComponent():
+                ...
+            case MaxInclusiveConstraintComponent():
+                ...
+
+            # Other constraints
+            case InConstraintComponent():
+                ...
+            case ClosedConstraintComponent():
+                ...
+            case HasValueConstraintComponent():
+                ...
+
+            case _:
+                raise NotImplementedError("Constraint not implemented: " + constr)
+
+
+# WARNING: all functions from this point on likely to be removed with no warning in a future version
 def node_to_datalog(node: Node) -> str:
     """
     Translates a Node object to an equivalent Datalog representation.
