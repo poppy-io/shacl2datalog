@@ -8,7 +8,47 @@ from rdflib.namespace import XSD
 from pyshacl.shape import Shape
 from pyshacl.constraints import CONSTRAINT_PARAMETERS_MAP
 from pyshacl.constraints.constraint_component import ConstraintComponent
-from pyshacl.constraints.core import *
+from pyshacl.constraints.core.cardinality_constraints import MaxCountConstraintComponent, MinCountConstraintComponent
+from pyshacl.constraints.core.logical_constraints import (
+    AndConstraintComponent,
+    NotConstraintComponent,
+    OrConstraintComponent,
+    XoneConstraintComponent,
+)
+from pyshacl.constraints.core.other_constraints import (
+    ClosedConstraintComponent,
+    HasValueConstraintComponent,
+    InConstraintComponent,
+)
+from pyshacl.constraints.core.property_pair_constraints import (
+    DisjointConstraintComponent,
+    EqualsConstraintComponent,
+    LessThanConstraintComponent,
+    LessThanOrEqualsConstraintComponent,
+)
+from pyshacl.constraints.core.shape_based_constraints import (
+    NodeConstraintComponent,
+    PropertyConstraintComponent,
+    QualifiedValueShapeConstraintComponent,
+)
+from pyshacl.constraints.core.string_based_constraints import (
+    LanguageInConstraintComponent,
+    MaxLengthConstraintComponent,
+    MinLengthConstraintComponent,
+    PatternConstraintComponent,
+    UniqueLangConstraintComponent,
+)
+from pyshacl.constraints.core.value_constraints import (
+    ClassConstraintComponent,
+    DatatypeConstraintComponent,
+    NodeKindConstraintComponent,
+)
+from pyshacl.constraints.core.value_range_constraints import (
+    MaxExclusiveConstraintComponent,
+    MaxInclusiveConstraintComponent,
+    MinExclusiveConstraintComponent,
+    MinInclusiveConstraintComponent,
+)
 
 
 def shape_to_rules(shape: Shape) -> Rules:
@@ -40,7 +80,7 @@ def shape_to_rules(shape: Shape) -> Rules:
 
 
 def targets_to_heads(target_nodes, target_classes, implicit_targets, target_objects_of,
-                     target_subjects_of) -> list[str]:
+                     target_subjects_of) -> tuple[list[str], list[str]]:
     """
 
     @param target_nodes:
@@ -56,7 +96,9 @@ def targets_to_heads(target_nodes, target_classes, implicit_targets, target_obje
             + [p[0].lower() + p[1:] + "(_, X)" for p in (str(t.toPython()) for t in
                                                          target_objects_of)]
             + [p[0].lower() + p[1:] + "(X, _)" for p in (str(t.toPython()) for t in
-                                                         target_subjects_of)])
+                                                         target_subjects_of)],
+
+              [".decl X"])
 
 
 def constraints_to_bodies(constraints: Iterable[ConstraintComponent]) -> Iterator[str]:
@@ -65,6 +107,10 @@ def constraints_to_bodies(constraints: Iterable[ConstraintComponent]) -> Iterato
     @param constraints:
     @return:
     """
+
+    # appended to symbols for a constraint and then incremented to avoid namespace conflicts
+    alpha: int = 0
+
     for c in constraints:
         match c:
             # Cardinal constraints
@@ -225,6 +271,6 @@ def literal_to_datalog(node: Literal) -> str:
         case XSD.QName:
             ...
         case XSD.NOTATION:
-            raise ValueError("NOTATION node passed to literal_to_datalog:", node)
+            raise ValueError("NOTATION literal passed to literal_to_datalog:", node)
         case _:
             raise ValueError("Literal datatype not handled: " + str(node.datatype))

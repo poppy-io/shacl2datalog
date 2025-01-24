@@ -23,7 +23,7 @@ class Rule:
         return self._body
 
     def __str__(self) -> str:
-        return (("%" + "\n%".join(self._comments) + "\n") if self._comments else ""
+        return (("//" + "\n//".join(self._comments) + "\n") if self._comments else ""
                 + self._head + " :- "
                 + (",\n" + " " * (len(self._head) + len(" :- "))).join(self._body) # align body terms
                 + ".")
@@ -41,13 +41,18 @@ class Rule:
 class Rules:
     """Container to hold a series of Rules with some convenience methods"""
 
-    def __init__(self, comments: list[str] = None, rules: set[Rule] = None) -> None:
-        self._comments = list[str] = comments
+    def __init__(self, comments: list[str] = None, declarations: list[str] = None, rules: set[Rule] = None) -> None:
+        self._comments: list[str] = comments
+        self._declarations: list[str] = declarations
         self._rules: set[Rule] = rules
 
     @property
     def comments(self) -> list[str]:
         return self._comments
+
+    @property
+    def declarations(self) -> list[str]:
+        return self._declarations
 
     @property
     def rules(self) -> set[Rule]:
