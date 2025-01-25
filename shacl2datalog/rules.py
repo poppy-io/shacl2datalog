@@ -56,7 +56,7 @@ class Rules:
 
     @property
     def rules(self) -> set[Rule]:
-        return self.rules
+        return self._rules
 
     def __iadd__(self, other: Rule | Self) -> Self:
         """

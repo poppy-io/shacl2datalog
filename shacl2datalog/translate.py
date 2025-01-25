@@ -2,6 +2,8 @@
 
 from .rules import Rule, Rules
 
+from typing import Iterator, Iterable
+
 from rdflib import Node, URIRef, BNode, Literal
 from rdflib.namespace import XSD
 
@@ -57,22 +59,17 @@ def shape_to_rules(shape: Shape) -> Rules:
     @param shape: Shape to be translated
     @return: Equivalent Rule object
     """
-
-    # TODO: implement deactivated shape handling
-    # TODO: implement shape severity
-    # TODO: implement shape messages
-
     shape_comments = ["Name(s): " + ", ".join(list(shape.name())),
                       "Description(s):"] + list(shape.description())
-    rules = Rules(shape_comments)
 
     if shape.is_property_shape():
         ...
     else:
-        heads = targets_to_heads(*shape.target())
+        declarations, heads = targets_to_heads(*shape.target())
         constraints = [CONSTRAINT_PARAMETERS_MAP[p](shape) for p, _
                        in shape.sg.predicate_objects(shape.node)]
-        bodies = set(constraint_to_body(constraints))
+        bodies = set(constraints_to_bodies(constraints))
+        rules = Rules(shape_comments, declarations)
         for head in heads:
             rules += Rule(comments, head, bodies)
 
