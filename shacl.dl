@@ -1,0 +1,178 @@
+.decl satisfied(shape:symbol)
+.decl conforms(shape:symbol, node:symbol)
+.decl target(shape:symbol, node:symbol)
+.decl value_node(shape:symbol, node:symbol)
+.decl path(node1:symbol, property:symbol, node2:symbol)
+.decl value(node:symbol)
+.decl language(node:symbol)
+
+.decl description(shape:symbol, description:symbol)
+.decl severity(shape:symbol, severity:symbol)
+.decl message(shape:symbol, message:symbol)
+.decl deactivated(shape:symbol)
+.decl node_shape(shape:symbol)
+.decl property_shape(shape:symbol)
+.decl property_path(shape:symbol, property:symbol)
+
+
+// deactivated shapes are always satisfied
+satisfied(shape) :- deactivated(shape).
+
+// For node shapes the value nodes are the individual focus nodes, forming a set with exactly one member.
+value_node(shape, node) :- node_shape(shape), target(shape, node).
+// For property shapes with a value for sh:path p the value nodes are the set of nodes in the data graph that can be
+// reached from the focus node with the path mapping of p.
+value_node(shape, node) :- property_shape(shape), property_path(shape, property),
+                           target(shape, n), path(n, property, node).
+
+
+// CARDINALITY CONSTRAINTS
+
+// sh:minCount specifies the minimum number of value nodes that satisfy the condition.
+.decl min_count_constr(shape:symbol, n:number)
+min_count_constr(shape, n) :- value_node(shape, node), c = count : { conforms(shape, node) },
+                              c >= n.
+
+// sh:minCount specifies the minimum number of value nodes that satisfy the condition.
+.decl max_count_constr(shape:symbol, n:number)
+max_count_constr(shape, n) :- value_node(shape, node), c = count : { conforms(shape, node) },
+                              c <= n.
+
+
+// LOGICAL CONSTRAINTS
+
+// sh:not specifies the condition that each value node cannot conform to a given shape.
+// This is comparable to negation and the logical "not" operator.
+.decl not_constr(shape:symbol, not_shape: symbol)
+not_constr(shape, not_shape) :- value_node(shape, node),
+                                !conforms(not_shape, node).
+
+// sh:and specifies the condition that each value node conforms to all provided shapes.
+// This is comparable to conjunction and the logical "and" operator.
+.decl and_constr(shape:symbol)
+.decl and_shape(shape:symbol, and_shape:symbol)
+and_constr(shape) :- value_node(shape, node),
+                     !(and_shape(shape, and_shape), !conforms(and_shape, node)).
+
+// sh:or specifies the condition that each value node conforms to at least one of the provided shapes.
+// This is comparable to disjunction and the logical "or" operator.
+.decl or_constr(shape:symbol)
+.decl or_shape(shape:symbol, or_shape:symbol)
+or_constr(shape) :- value_node(shape, node), or_shape(shape, or_shape),
+                    conforms(or_shape, node).
+
+// sh:xone specifies the condition that each value node conforms to exactly one of the provided shapes.
+.decl xone_constr(shape:symbol)
+.decl xone_shape(shape:symbol, xone_shape:symbol)
+xone_constr(shape) :- value_node(shape, node), xone_shape(shape, xone_shape),
+                      1 = count : { conforms(node, xone_shape) }.
+
+
+// PROPERTY PAIR CONSTRAINTS
+
+// sh:equals specifies the condition that the set of all value nodes is equal to the set of objects of the triples that
+// have the focus node as subject and the value of sh:equals as predicate.
+.decl equals_constr(shape:symbol, predicate:symbol)
+equals_constr(shape, predicate) :- target(shape, fnode),
+                                   !(value_node(shape, node), !path(fnode, predicate, node)),
+                                   !(!value_node(shape, node), path(fnode, predicate, node)).
+
+// sh:disjoint specifies the condition that the set of value nodes is disjoint with the set of objects of the triples
+// that have the focus node as subject and the value of sh:disjoint as predicate.
+.decl disjoint_constr(shape:symbol, predicate:symbol)
+disjoint_constr(shape, predicate) :- target(shape, fnode), value_node(shape, node),
+                                     !path(fnode, predicate, node).
+
+// sh:lessThan specifies the condition that each value node is smaller than all the objects of the triples that have the
+// focus node as subject and the value of sh:lessThan as predicate.
+.decl less_than_constr(shape:symbol, predicate:symbol)
+less_than_constr(shape, predicate) :- target(shape, fnode), value_node(shape, node),
+                                      !(path(node, predicate, pnode), pnode < fnode).
+
+// sh:lessThanOrEquals specifies the condition that each value node is smaller than or equal to all the objects of the
+// triples that have the focus node as subject and the value of sh:lessThanOrEquals as predicate.
+.decl less_than_constr(shape:symbol, predicate:symbol)
+less_than_constr(shape, predicate) :- target(shape, fnode), value_node(shape, node),
+                                      !(path(node, predicate, pnode), pnode <= fnode).
+
+
+// SHAPE BASED CONSTRAINTS
+
+// sh:property can be used to specify that each value node has a given property shape.
+.decl property_constr(shape:symbol, pshape:symbol)
+property_constr(shape, pshape) :- value_node(shape, fnode),
+                                  conforms(pshape, fnode).
+
+// sh:node specifies the condition that each value node conforms to the given node shape.
+.decl node_constr(shape:symbol, nshape:symbol)
+node_constr(shape, nshape) :- value_node(shape, fnode),
+                              conforms(nshape, fnode).
+
+// sh:qualifiedValueShape specifies the condition that a specified number of value nodes conforms to the given shape.
+// Each sh:qualifiedValueShape can have: one value for sh:qualifiedMinCount, one value for sh:qualifiedMaxCount or,
+// one value for each, at the same subject.
+
+// TODO: qualifiedValueShape
+
+
+// STRING BASED CONSTRAINTS
+
+// sh:minLength specifies the minimum string length of each value node that satisfies the condition.
+// This can be applied to any literals and IRIs, but not to blank nodes.
+.decl min_length_constr(shape:symbol, length:number)
+min_length_constr(shape, length) :- value_node(shape, fnode), val = value(fnode),
+                                    length <= strlen(val).
+
+// sh:maxLength specifies the maximum string length of each value node that satisfies the condition.
+// This can be applied to any literals and IRIs, but not to blank nodes.
+.decl max_length_constr(shape:symbol, length:number)
+max_length_constr(shape, length) :- value_node(shape, fnode), val = value(fnode),
+                                    length >= strlen(val).
+
+// sh:pattern specifies a regular expression that each value node matches to satisfy the condition.
+.decl pattern_constr(shape:symbol, pattern:symbol)
+// TODO: sh:pattern (REGEX)
+
+// The condition specified by sh:languageIn is that the allowed language tags for each value node are limited by a given
+// list of language tags.
+.decl language_in_constr(shape:symbol)
+.decl constr_language_tag(shape:symbol, tag:symbol)
+language_in_constr(shape) :- value_node(shape, fnode), lang = language(fnode),
+                             constr_language_tag(shape, lang).
+
+// The property sh:uniqueLang can be set to true to specify that no pair of value nodes may use the same language tag.
+.decl unique_lang_constr(shape:symbol)
+unique_lang_constr(shape) :- value_node(shape, fnode1), value_node(shape, fnode2),
+                             lang1 = language(fnode1), lang2 = language(fnode2),
+                             !(fnode1 != fnode2, lang1 = lang2).
+
+
+// VALUE CONSTRAINTS
+// TODO: VALUE CONSTRAINTS
+
+
+// VALUE RANGE CONSTRAINTS
+
+// For each value node v where the SPARQL expression $minExclusive < v does not return true,
+// there is a validation result with v as sh:value.
+.decl min_exclusive_constr(shape:symbol, n:number)
+min_exclusive_constr(shape, n) :- value_node(shape, fnode), val = value(fnode),
+                                  n < val.
+
+// For each value node v where the SPARQL expression $minInclusive <= v does not return true,
+// there is a validation result with v as sh:value.
+.decl min_inclusive_constr(shape:symbol, n:number)
+min_inclusive_constr(shape, n) :- value_node(shape, fnode), val = value(fnode),
+                                  n <= val.
+
+// For each value node v where the SPARQL expression $maxExclusive > v does not return true,
+// there is a validation result with v as sh:value.
+.decl max_exclusive_constr(shape:symbol, n:number)
+max_exclusive_constr(shape, n) :- value_node(shape, fnode), val = value(fnode),
+                                  n > val.
+
+// For each value node v where the SPARQL expression $maxInclusive >= v does not return true,
+// there is a validation result with v as sh:value.
+.decl max_inclusive_constr(shape:symbol, n:number)
+max_inclusive_constr(shape, n) :- value_node(shape, fnode), val = value(fnode),
+                                  n >= val.
