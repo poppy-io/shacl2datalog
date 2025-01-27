@@ -3,8 +3,20 @@
 .decl target(shape:symbol, node:symbol)
 .decl value_node(shape:symbol, node:symbol)
 .decl path(node1:symbol, property:symbol, node2:symbol)
-.decl value(node:symbol)
-.decl language(node:symbol)
+
+// instance is an instance of class
+.decl instance_of(class:symbol, instance:symbol)
+// class2 is a subclass of class1
+.decl subclass(class1:symbol, class2:symbol)
+// type is the datatype of node
+.decl datatype(node:symbol, type:symbol)
+// kind is the node kind of node (i.e. IRI, BNode, Literal, or some combination thereof)
+.decl node_kind(node:symbol, kind:symbol)
+
+// value is the value of node
+.decl value(node:symbol, value:symbol)
+// language is the language tag of node
+.decl language(node:symbol, language:symbol)
 
 .decl description(shape:symbol, description:symbol)
 .decl severity(shape:symbol, severity:symbol)
@@ -14,6 +26,10 @@
 .decl property_shape(shape:symbol)
 .decl property_path(shape:symbol, property:symbol)
 
+
+// an instance of a subclass is also an instance of a superclass
+instance_of(class, instance) :- subclass(class, subclass),
+                                instance_of(subclass, instance).
 
 // deactivated shapes are always satisfied
 satisfied(shape) :- deactivated(shape).
@@ -111,33 +127,80 @@ node_constr(shape, nshape) :- value_node(shape, fnode),
 // sh:qualifiedValueShape specifies the condition that a specified number of value nodes conforms to the given shape.
 // Each sh:qualifiedValueShape can have: one value for sh:qualifiedMinCount, one value for sh:qualifiedMaxCount or,
 // one value for each, at the same subject.
+.decl qualified_value_constr(shape:symbol)
+.decl qualified_value_shape(shape:symbol, qshape:symbol)
+.decl qualified_value_disjoint(shape:symbol)
+.decl qualified_min_count(shape:symbol, qshape:symbol, n:number)
+.decl qualified_max_count(shape:symbol, qshape:symbol, n:number)
 
-// TODO: qualifiedValueShape
-
+// min only, no disjoint
+qualified_value_constr(shape) :- value_node(shape, fnode), qualified_value_shape(shape, qshape),
+                                 qualified_min_count(shape, qshape, n),
+                                 !qualified_value_disjoint(shape), !qualified_max_count(shape, qshape, _),
+                                 c = count : { conforms(qshape, fnode) },
+                                 c >= n.
+// max only, no disjoint
+qualified_value_constr(shape) :- value_node(shape, fnode), qualified_value_shape(shape, qshape),
+                                 qualified_max_count(shape, qshape, n),
+                                 !qualified_value_disjoint(shape), !qualified_min_count(shape, qshape, _),
+                                 c = count : { conforms(qshape, fnode) },
+                                 c <= n.
+// min and max, no disjoint
+qualified_value_constr(shape) :- value_node(shape, fnode), qualified_value_shape(shape, qshape),
+                                 qualified_min_count(shape, qshape, min_n), qualified_max_count(shape, qshape, max_n),
+                                 !qualified_value_disjoint(shape),
+                                 c = count : { conforms(qshape, fnode) },
+                                 c >= min_n, c <= max_n.
+// min only, disjoint
+qualified_value_constr(shape) :- value_node(shape, fnode),
+                                 qualified_value_shape(shape, qshape1), qualified_value_shape(shape, qshape2),
+                                 qshape1 != qshape2, !conforms(fnode, qshape2),
+                                 qualified_min_count(shape, qshape1, n), qualified_value_disjoint(shape),
+                                 !qualified_max_count(shape, qshape1, _),
+                                 c = count : { conforms(qshape1, fnode) },
+                                 c >= n.
+// max only, disjoint
+qualified_value_constr(shape) :- value_node(shape, fnode),
+                                 qualified_value_shape(shape, qshape1), qualified_value_shape(shape, qshape2),
+                                 qshape1 != qshape2, !conforms(fnode, qshape2),
+                                 qualified_max_count(shape, qshape1, n), qualified_value_disjoint(shape),
+                                 !qualified_min_count(shape, qshape1, _),
+                                 c = count : { conforms(qshape1, fnode) },
+                                 c <= n.
+// min and max, disjoint
+qualified_value_constr(shape) :- value_node(shape, fnode),
+                                 qualified_value_shape(shape, qshape1), qualified_value_shape(shape, qshape2),
+                                 qshape1 != qshape2, !conforms(fnode, qshape2),
+                                 qualified_min_count(shape, qshape1, min_n), qualified_max_count(shape, qshape1, max_n),
+                                 qualified_value_disjoint(shape),
+                                 c = count : { conforms(qshape1, fnode) },
+                                 c >= min_n, c <= max_n.
 
 // STRING BASED CONSTRAINTS
 
 // sh:minLength specifies the minimum string length of each value node that satisfies the condition.
 // This can be applied to any literals and IRIs, but not to blank nodes.
 .decl min_length_constr(shape:symbol, length:number)
-min_length_constr(shape, length) :- value_node(shape, fnode), val = value(fnode),
+min_length_constr(shape, length) :- value_node(shape, fnode), value(fnode, val),
                                     length <= strlen(val).
 
 // sh:maxLength specifies the maximum string length of each value node that satisfies the condition.
 // This can be applied to any literals and IRIs, but not to blank nodes.
 .decl max_length_constr(shape:symbol, length:number)
-max_length_constr(shape, length) :- value_node(shape, fnode), val = value(fnode),
+max_length_constr(shape, length) :- value_node(shape, fnode), value(fnode, val),
                                     length >= strlen(val).
 
 // sh:pattern specifies a regular expression that each value node matches to satisfy the condition.
 .decl pattern_constr(shape:symbol, pattern:symbol)
-// TODO: sh:pattern (REGEX)
+.functor regex_match(pattern:symbol, string:symbol):symbol
+pattern_constr(shape, pattern) :- value_node(shape, fnode), value(fnode, val),
+                                  @regex_match(pattern, val) = "true".
 
 // The condition specified by sh:languageIn is that the allowed language tags for each value node are limited by a given
 // list of language tags.
 .decl language_in_constr(shape:symbol)
 .decl constr_language_tag(shape:symbol, tag:symbol)
-language_in_constr(shape) :- value_node(shape, fnode), lang = language(fnode),
+language_in_constr(shape) :- value_node(shape, fnode), language(fnode, lang),
                              constr_language_tag(shape, lang).
 
 // The property sh:uniqueLang can be set to true to specify that no pair of value nodes may use the same language tag.
@@ -148,31 +211,44 @@ unique_lang_constr(shape) :- value_node(shape, fnode1), value_node(shape, fnode2
 
 
 // VALUE CONSTRAINTS
-// TODO: VALUE CONSTRAINTS
 
+// The condition specified by sh:class is that each value node is a SHACL instance of a given type.
+.decl class_constr(shape:symbol, class:symbol)
+class_constr(shape, class) :- value_node(shape, fnode),
+                              instance_of(class, fnode).
+
+// sh:datatype specifies a condition to be satisfied with regards to the datatype of each value node.
+.decl datatype_constr(shape:symbol, type:symbol)
+datatype_constr(shape, type) :- value_node(shape, fnode),
+                                datatype(fnode, type).
+
+// sh:nodeKind specifies a condition to be satisfied by the RDF node kind of each value node.
+.decl node_kind_constr(shape:symbol, kind:symbol)
+node_kind_constr(shape, kind) :- value_node(shape, fnode),
+                                 node_kind(fnode, kind).
 
 // VALUE RANGE CONSTRAINTS
 
 // For each value node v where the SPARQL expression $minExclusive < v does not return true,
 // there is a validation result with v as sh:value.
 .decl min_exclusive_constr(shape:symbol, n:number)
-min_exclusive_constr(shape, n) :- value_node(shape, fnode), val = value(fnode),
+min_exclusive_constr(shape, n) :- value_node(shape, fnode), value(fnode, val),
                                   n < val.
 
 // For each value node v where the SPARQL expression $minInclusive <= v does not return true,
 // there is a validation result with v as sh:value.
 .decl min_inclusive_constr(shape:symbol, n:number)
-min_inclusive_constr(shape, n) :- value_node(shape, fnode), val = value(fnode),
+min_inclusive_constr(shape, n) :- value_node(shape, fnode), value(fnode, val),
                                   n <= val.
 
 // For each value node v where the SPARQL expression $maxExclusive > v does not return true,
 // there is a validation result with v as sh:value.
 .decl max_exclusive_constr(shape:symbol, n:number)
-max_exclusive_constr(shape, n) :- value_node(shape, fnode), val = value(fnode),
+max_exclusive_constr(shape, n) :- value_node(shape, fnode), value(fnode, val),
                                   n > val.
 
 // For each value node v where the SPARQL expression $maxInclusive >= v does not return true,
 // there is a validation result with v as sh:value.
 .decl max_inclusive_constr(shape:symbol, n:number)
-max_inclusive_constr(shape, n) :- value_node(shape, fnode), val = value(fnode),
+max_inclusive_constr(shape, n) :- value_node(shape, fnode), value(fnode, val),
                                   n >= val.
