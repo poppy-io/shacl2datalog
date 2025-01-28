@@ -107,7 +107,10 @@ class DatalogShape:
         return f"satisfied({self.name})"
 
     def propagate_constraints(self) -> None:
-        """Process self._constraints in order to populate comments, declarations, and rules."""
+        """Process self._constraints in order to populate rules."""
+
+
+
 
         for c in constraints:
             match c:
@@ -116,7 +119,7 @@ class DatalogShape:
                     min_count = int(c.min_count.value)
                     if min_count == 0:
                         continue
-                    ...
+                    self._rules.add(Rule(f"min_count_constr({...}, {min_count})"))
                 case MaxCountConstraintComponent():
                     max_count = int(c.max_count.value)
                     ...

@@ -1,16 +1,16 @@
 """Script allowing CLI usage of the library."""
 
 import pyshacl
-from .read import read
-from .rules import Rules
-from .translate import shape_to_rules
+import rdflib
+
+from .datalog_shape_graph import DatalogShapesGraph
 
 def main(*args, **kwargs) -> None:
     """Read a given SHACL file from a given path or URl and output equivalent Datalog rules
     to a given filepath."""
 
+    graph = pyshacl.ShapesGraph(rdflib.Graph(args[0]))
+    datalog = DatalogShapesGraph(graph).to_datalog()
 
-    graph: pyshacl.ShapesGraph = read(args[0])
-
-    datalog: list[Rules] = [shape_to_rules(shape) for shape in graph.shapes]
-    ...
+    with open(args[1], 'w') as file:
+        file.write(datalog)

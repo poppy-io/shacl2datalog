@@ -5,7 +5,7 @@ from typing import Self
 class Rule:
     """Representation of a Datalog rule."""
 
-    def __init__(self, comments: list[str] = None, head: str = None, body: set[str] = None):
+    def __init__(self, head: str = None, body: set[str] = None, comments: list[str] = None):
         self._comments = comments
         self._head = head
         self._body = body

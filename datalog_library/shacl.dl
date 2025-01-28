@@ -1,3 +1,5 @@
+// TODO: make this entire file a soufflé component?
+
 .decl satisfied(shape:symbol)
 .decl conforms(shape:symbol, node:symbol)
 .decl target(shape:symbol, node:symbol)
@@ -33,6 +35,35 @@ instance_of(class, instance) :- subclass(class, subclass),
 
 // deactivated shapes are always satisfied
 satisfied(shape) :- deactivated(shape).
+// shapes are satisfied if there are no violated constraints
+satisfied(shape) :- !( !min_count_constr(shape, _)       ;
+                       !max_count_constr(shape, _)       ;
+                       !not_constr(shape, _)             ;
+                       !and_constr(shape)                ;
+                       !or_constr(shape)                 ;
+                       !xone_constr(shape)               ;
+                       !equals_constr(shape, _)          ;
+                       !disjoint_constr(shape, _)        ;
+                       !less_than_constr(shape, _)       ;
+                       !less_than_or_eq_constr(shape, _) ;
+                       !property_constr(shape, _)        ;
+                       !node_constr(shape, _)            ;
+                       !qualified_value_constr(shape)    ;
+                       !min_length_constr(shape, _)      ;
+                       !max_length_constr(shape, _)      ;
+                       !pattern_constr(shape, _)         ;
+                       !language_in_constr(shape)        ;
+                       !unique_lang_constr(shape)        ;
+                       !class_constr(shape, _)           ;
+                       !datatype_constr(shape, _)        ;
+                       !node_kind_constr(shape, _)       ;
+                       !min_exclusive_constr(shape, _)   ;
+                       !min_inclusive_constr(shape, _)   ;
+                       !max_exclusive_constr(shape, _)   ;
+                       !max_inclusive_constr(shape, _)   ).
+// a node conforms to a shape if it is a value node of the shape and the shape is satisfied
+// FIXME: there's no way this is the best way to do node conformance testing
+conforms(shape, node) :- value_node(shape, node), satisfied(shape).
 
 // For node shapes the value nodes are the individual focus nodes, forming a set with exactly one member.
 value_node(shape, node) :- node_shape(shape), target(shape, node).
@@ -107,9 +138,9 @@ less_than_constr(shape, predicate) :- target(shape, fnode), value_node(shape, no
 
 // sh:lessThanOrEquals specifies the condition that each value node is smaller than or equal to all the objects of the
 // triples that have the focus node as subject and the value of sh:lessThanOrEquals as predicate.
-.decl less_than_constr(shape:symbol, predicate:symbol)
-less_than_constr(shape, predicate) :- target(shape, fnode), value_node(shape, node),
-                                      !(path(node, predicate, pnode), pnode <= fnode).
+.decl less_than_or_eq_constr(shape:symbol, predicate:symbol)
+less_than_or_eq_constr(shape, predicate) :- target(shape, fnode), value_node(shape, node),
+                                            !(path(node, predicate, pnode), pnode <= fnode).
 
 
 // SHAPE BASED CONSTRAINTS
@@ -119,6 +150,9 @@ less_than_constr(shape, predicate) :- target(shape, fnode), value_node(shape, no
 property_constr(shape, pshape) :- value_node(shape, fnode),
                                   conforms(pshape, fnode).
 
+// note that the difference between these two constraints is handled by the value_node rule's handling of different
+// types of shape
+
 // sh:node specifies the condition that each value node conforms to the given node shape.
 .decl node_constr(shape:symbol, nshape:symbol)
 node_constr(shape, nshape) :- value_node(shape, fnode),
@@ -126,7 +160,7 @@ node_constr(shape, nshape) :- value_node(shape, fnode),
 
 // sh:qualifiedValueShape specifies the condition that a specified number of value nodes conforms to the given shape.
 // Each sh:qualifiedValueShape can have: one value for sh:qualifiedMinCount, one value for sh:qualifiedMaxCount or,
-// one value for each, at the same subject.
+// one value for each, at the same subject.datalog += f"max_count_constr({name}, {node_to_str(not_c)}).\n"
 .decl qualified_value_constr(shape:symbol)
 .decl qualified_value_shape(shape:symbol, qshape:symbol)
 .decl qualified_value_disjoint(shape:symbol)
