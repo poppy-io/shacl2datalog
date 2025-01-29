@@ -1,8 +1,9 @@
 #include <cstdint>
+#include <cstddef>
 #include <regex.h>
 extern "C" {
 
-int32_t regex_match(const char *pattern, const char *string)
+int32_t regex_match(const char* pattern, const char* string)
 {
   regex_t comp_patt;
   int value;
@@ -16,7 +17,7 @@ int32_t regex_match(const char *pattern, const char *string)
     return 2;
   }
 
-  value = regexec( &comp_patt, &string, 0, NULL, 0 );
+  value = regexec( &comp_patt, string, 0, NULL, 0 );
 
   if (value == 0) {
     return 1;

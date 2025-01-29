@@ -103,7 +103,7 @@
         packages = [
           python
           pkgs.uv
-          gcc
+          pkgs.gcc
         ];
 
         env =
