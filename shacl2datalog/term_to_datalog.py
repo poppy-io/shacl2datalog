@@ -1,7 +1,7 @@
 import rdflib
 
 from decimal import Decimal
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time#, timedelta
 
 
 def term_to_datalog(term: rdflib.Node) -> str:

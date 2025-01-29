@@ -1,5 +1,3 @@
-from typing import Iterable
-
 import pyshacl
 
 FORBIDDEN_NAMES = {

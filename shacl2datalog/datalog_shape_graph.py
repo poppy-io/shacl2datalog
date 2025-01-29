@@ -3,7 +3,7 @@ from typing import Iterable
 import pyshacl
 
 from .shape_to_datalog import shape_to_datalog
-from .name import name, name_one_shape
+from .name import name
 
 
 class DatalogShapesGraph:
