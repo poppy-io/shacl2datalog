@@ -1,8 +1,9 @@
 """Simple wrapper around rdflib for reading in SHACL"""
 
-from rdflib import Graph
+import rdflib
+import pyshacl
 
-def read(path: str) -> Graph:
+def read(path: str) -> rdflib.Graph:
     """
     Lightweight wrapper around rdflib.Graph.parse with some checks to make sure we're working
     with SHACL.
@@ -10,11 +11,18 @@ def read(path: str) -> Graph:
     @return: Graph object describing file at path
     """
 
-    g = Graph()
+    g = rdflib.Graph()
 
-    # TODO: handling of malformed path either here or in main
-    g.parse(path)
+    try:
+        g.parse(location=path, format="application/rdf+xml")
+    except SyntaxError as se:
+        print("Graph is not valid RDF. Please check the provided path and file.")
+        raise se
 
-    # TODO: validate g
+    try:
+        sg = pyshacl.ShapesGraph(g)
+    except pyshacl.ShapeLoadError as sle:
+        print("Graph is not valid SHACL.")
+        raise sle
 
-    return g
+    return sg

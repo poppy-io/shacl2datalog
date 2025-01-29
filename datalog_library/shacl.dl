@@ -226,9 +226,9 @@ max_length_constr(shape, length) :- value_node(shape, fnode), value(fnode, val),
 
 // sh:pattern specifies a regular expression that each value node matches to satisfy the condition.
 .decl pattern_constr(shape:symbol, pattern:symbol)
-.functor regex_match(pattern:symbol, string:symbol):symbol
+.functor regex_match(pattern:symbol, string:symbol):number
 pattern_constr(shape, pattern) :- value_node(shape, fnode), value(fnode, val),
-                                  @regex_match(pattern, val) = "true".
+                                  @regex_match(pattern, val) = 1.
 
 // The condition specified by sh:languageIn is that the allowed language tags for each value node are limited by a given
 // list of language tags.
