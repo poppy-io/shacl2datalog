@@ -14,7 +14,7 @@ def read(path: str) -> rdflib.Graph:
     g = rdflib.Graph()
 
     try:
-        g.parse(location=path, format="application/rdf+xml")
+        g.parse(location=path)
     except SyntaxError as se:
         print("Graph is not valid RDF. Please check the provided path and file.")
         raise se

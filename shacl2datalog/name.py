@@ -1,5 +1,7 @@
 from typing import Iterable
 
+import pyshacl
+
 FORBIDDEN_NAMES = {
     # validation rules
     "satisfied",
@@ -73,19 +75,22 @@ PERMITTED_CHARACTERS = ( "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                        + "0123456789"
                        + "_?" )
 
-def name(graph: pyshacl.ShapesGraph) -> Iterable[tuple[str, pyshacl.shape.Shape]]:
+def name(graph: pyshacl.ShapesGraph) -> tuple[list[tuple[str, pyshacl.shape.Shape]], set[str]]:
     """
     Associate each shape with a name so it can be referred to in Datalog.
 
     @param graph: Shape graph to be named
-    @return: (name for shape, shape)
+    @return: (name for shape, shape), namespace
     """
 
     namespace = FORBIDDEN_NAMES
 
+    # can't use a generator; no point in returning a shape without a completed namespace
+    named_shapes = []
     for shape in graph.shapes:
         named_shape, namespace = name_one_shape(shape, namespace)
-        yield named_shape
+        named_shapes.append(named_shape)
+    return named_shapes, namespace
 
 
 def name_one_shape(shape: pyshacl.ShapesGraph, namespace: set[str]) -> tuple[
@@ -102,8 +107,11 @@ def name_one_shape(shape: pyshacl.ShapesGraph, namespace: set[str]) -> tuple[
     @param namespace: Set of names that can't be used.
     @return: (name for shape, shape), updated namespace
     """
-    shape_name: str = next(shape.name)
-    shape_name = shape_name if shape_name else "shape"
+    shape_name: str
+    try:
+        shape_name = next(shape.name)
+    except StopIteration:
+        shape_name = "shape"
 
     # handle illegal characters
     if shape_name[0] not in PERMITTED_INITIALS:

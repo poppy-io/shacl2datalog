@@ -3,14 +3,14 @@ from typing import Iterable
 import pyshacl
 
 from .shape_to_datalog import shape_to_datalog
-from .name import name
+from .name import name, name_one_shape
 
 
 class DatalogShapesGraph:
     """ Wrapper around a pySHACL ShapeGraph. """
 
     def __init__(self, graph: pyshacl.ShapesGraph) -> None:
-        self._shapes = name(graph)
+        self._shapes, self.namespace = name(graph)
 
     @property
     def shapes(self) -> Iterable[tuple[str, pyshacl.shape.Shape]]:
@@ -23,6 +23,7 @@ class DatalogShapesGraph:
         datalog: str = ".include shacl.dl\n\n"
 
         for shape in self.shapes:
-            datalog += shape_to_datalog(*shape)
+            new_datalog, self.namespace = shape_to_datalog(*shape, namespace=self.namespace)
+            datalog += new_datalog
 
         return datalog
