@@ -4,9 +4,9 @@ from .name import name_one_shape
 from .term_to_datalog import term_to_datalog
 
 
-def shape_to_datalog(name: str, shape: pyshacl.shape.Shape, namespace: set[str] = None) -> tuple[
+def shape_to_datalog(name: str, shape: pyshacl.shape.Shape, namespace: set[str] | None = None) -> tuple[
                                                                                            str,
-                                                                                           set[str]]:
+                                                                                           set[str] | None]:
     """
     Translates a Shape object into an equivalent datalog string.
 
@@ -103,7 +103,7 @@ def shape_to_datalog(name: str, shape: pyshacl.shape.Shape, namespace: set[str] 
                         # shortcut to output of name_one_shape on an empty set
                         other_name = "shape"
                     shape_datalog, namespace = shape_to_datalog(other_name, other_shape, namespace)
-                    datalog += shape_datalog
+                    datalog += "{" + shape_datalog + "}"
                     datalog += "property_constr(name, other_name).\n"
             case pyshacl.constraints.NodeConstraintComponent():
                 for shape_node in c.node_shapes:

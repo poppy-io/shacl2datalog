@@ -1,0 +1,149 @@
+.include shacl.dl
+
+<
+
+severity(shape, "http://www.w3.org/ns/shacl#Violation").
+node_shape(shape).
+
+target(shape, node) :- instance_of("http://datashapes.org/sh/tests/core/complex/personexample.test#Person", node).
+
+
+
+{
+
+severity(shape2, "http://www.w3.org/ns/shacl#Violation").
+property_shape(shape2).
+
+
+
+
+
+datatype_constr(shape2, "http://www.w3.org/2001/XMLSchema#string").
+max_count_constr(shape2, 1).
+pattern_constr(shape2, "^\d{3}-\d{2}-\d{4}$").
+}property_constr(name, other_name).
+{
+
+severity(shape3, "http://www.w3.org/ns/shacl#Violation").
+property_shape(shape3).
+
+
+
+
+
+class_constr(shape3, "http://datashapes.org/sh/tests/core/complex/personexample.test#Company").
+node_kind_constr(shape3, "http://www.w3.org/ns/shacl#IRI").
+}property_constr(name, other_name).
+{
+
+severity(employee0, "http://www.w3.org/ns/shacl#Violation").
+property_shape(employee0).
+
+
+
+
+
+}property_constr(name, other_name).
+{
+
+severity(shape4, "http://www.w3.org/ns/shacl#Violation").
+property_shape(shape4).
+
+
+
+
+
+datatype_constr(shape4, "http://www.w3.org/2001/XMLSchema#string").
+max_count_constr(shape4, 1).
+pattern_constr(shape4, "^\d{3}-\d{2}-\d{4}$").
+}property_constr(name, other_name).
+{
+
+severity(shape5, "http://www.w3.org/ns/shacl#Violation").
+property_shape(shape5).
+
+
+
+
+
+class_constr(shape5, "http://datashapes.org/sh/tests/core/complex/personexample.test#Company").
+node_kind_constr(shape5, "http://www.w3.org/ns/shacl#IRI").
+}property_constr(name, other_name).
+{
+
+severity(employee1, "http://www.w3.org/ns/shacl#Violation").
+property_shape(employee1).
+
+
+
+
+
+}property_constr(name, other_name).
+{
+
+severity(shape6, "http://www.w3.org/ns/shacl#Violation").
+property_shape(shape6).
+
+
+
+
+
+datatype_constr(shape6, "http://www.w3.org/2001/XMLSchema#string").
+max_count_constr(shape6, 1).
+pattern_constr(shape6, "^\d{3}-\d{2}-\d{4}$").
+}property_constr(name, other_name).
+{
+
+severity(shape7, "http://www.w3.org/ns/shacl#Violation").
+property_shape(shape7).
+
+
+
+
+
+class_constr(shape7, "http://datashapes.org/sh/tests/core/complex/personexample.test#Company").
+node_kind_constr(shape7, "http://www.w3.org/ns/shacl#IRI").
+}property_constr(name, other_name).
+{
+
+severity(employee2, "http://www.w3.org/ns/shacl#Violation").
+property_shape(employee2).
+
+
+
+
+
+}property_constr(name, other_name).
+><
+
+severity(employee, "http://www.w3.org/ns/shacl#Violation").
+property_shape(employee).
+
+
+
+
+
+><
+
+severity(shape0, "http://www.w3.org/ns/shacl#Violation").
+property_shape(shape0).
+
+
+
+
+
+datatype_constr(shape0, "http://www.w3.org/2001/XMLSchema#string").
+max_count_constr(shape0, 1).
+pattern_constr(shape0, "^\d{3}-\d{2}-\d{4}$").
+><
+
+severity(shape1, "http://www.w3.org/ns/shacl#Violation").
+property_shape(shape1).
+
+
+
+
+
+class_constr(shape1, "http://datashapes.org/sh/tests/core/complex/personexample.test#Company").
+node_kind_constr(shape1, "http://www.w3.org/ns/shacl#IRI").
+>
