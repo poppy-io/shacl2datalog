@@ -104,6 +104,7 @@
           python
           pkgs.uv
           pkgs.gcc
+          pkgs.souffle
         ];
 
         env =

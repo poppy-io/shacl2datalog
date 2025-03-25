@@ -20,7 +20,7 @@ class DatalogShapesGraph:
         """ Return Datalog text expressing self._graph """
 
         # import library file (even though path will likely be edited by end user)
-        datalog: str = ".include shacl.dl\n\n"
+        datalog: str = ".include \"shacl.dl\""
 
         for shape in self.shapes:
             new_datalog, self.namespace = shape_to_datalog(*shape, namespace=self.namespace)

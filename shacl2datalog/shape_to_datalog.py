@@ -16,12 +16,12 @@ def shape_to_datalog(name: str, shape: pyshacl.shape.Shape, namespace: set[str] 
     @return: the translated datalog string, updated namespace
     """
 
-    datalog: str = ""
+    datalog: str = "\n"
 
     # many attributes of Shapes are given as iterables
     # (presumably due to multiple language translations)
-    datalog += "\n".join(f"description({name}, {desc})." for desc in shape.description) + "\n"
-    datalog += "\n".join(f"message({name}, {msg})." for msg in shape.message) + "\n"
+    datalog += "".join(f"description({name}, {desc}).\n" for desc in shape.description)
+    datalog += "".join(f"message({name}, {msg}).\n" for msg in shape.message)
 
     if shape.deactivated:
         datalog += f"deactivated({name}).\n"
@@ -33,16 +33,16 @@ def shape_to_datalog(name: str, shape: pyshacl.shape.Shape, namespace: set[str] 
                 else f"node_shape({name}).\n"
 
     # translate targets of shape
-    datalog += "\n".join(f"target({name}, {n})." for n in
-                         map(term_to_datalog, shape.target_nodes())) + "\n"
-    datalog += "\n".join(f"target({name}, node) :- instance_of({c}, node)." for c in
-                         map(term_to_datalog, shape.target_classes())) + "\n"
-    datalog += "\n".join(f"target({name}, node) :- instance_of({c}, node)." for c in
-                         map(term_to_datalog, shape.implicit_class_targets())) + "\n"
-    datalog += "\n".join(f"target({name}, node) :- path(_, {p}, node)." for p in
-                         map(term_to_datalog, shape.target_objects_of())) + "\n"
-    datalog += "\n".join(f"target({name}, node) :- path(node, {p}, _)." for p in
-                         map(term_to_datalog, shape.target_subjects_of())) + "\n"
+    datalog += "".join(f"target({name}, {n}).\n" for n in
+                         map(term_to_datalog, shape.target_nodes()))
+    datalog += "".join(f"target({name}, node) :- instance_of({c}, node).\n" for c in
+                         map(term_to_datalog, shape.target_classes()))
+    datalog += "".join(f"target({name}, node) :- instance_of({c}, node).\n" for c in
+                         map(term_to_datalog, shape.implicit_class_targets()))
+    datalog += "".join(f"target({name}, node) :- path(_, {p}, node).\n" for p in
+                         map(term_to_datalog, shape.target_objects_of()))
+    datalog += "".join(f"target({name}, node) :- path(node, {p}, _).\n" for p in
+                         map(term_to_datalog, shape.target_subjects_of()))
 
     # construct iterable of constraint objects from shape
     for c in (pyshacl.constraints.CONSTRAINT_PARAMETERS_MAP[p](shape)
@@ -103,7 +103,7 @@ def shape_to_datalog(name: str, shape: pyshacl.shape.Shape, namespace: set[str] 
                         # shortcut to output of name_one_shape on an empty set
                         other_name = "shape"
                     shape_datalog, namespace = shape_to_datalog(other_name, other_shape, namespace)
-                    datalog += "{" + shape_datalog + "}"
+                    datalog += shape_datalog
                     datalog += "property_constr(name, other_name).\n"
             case pyshacl.constraints.NodeConstraintComponent():
                 for shape_node in c.node_shapes:

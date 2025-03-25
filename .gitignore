@@ -4,3 +4,7 @@
 
 # Pycharm
 .idea/
+
+# Results
+shacl_tests/
+out/

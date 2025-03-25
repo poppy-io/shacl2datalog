@@ -24,13 +24,13 @@ def term_to_datalog(term: rdflib.Node) -> str:
                 # timey types
                 case datetime() | date() | time():
                     # FIXME(?) production of decidedly evil underscore iso format
-                    return term.value.isoformat().replace("-", "_")
+                    return "date"+term.value.isoformat().replace("-", "_")
                 # FIXME: date duration to iso function access? github:rdflib/rdflib/xsd_datetime.py
                 # case rdflib.xsd_dateDuration() | timedelta():
 
                 # everything else is considered stringy
                 case _:
-                    return f"\"{term.value}\""
+                    return f"\"{term.value}\"".replace("\\", "\\\\")
 
         case rdflib.BNode():
             return f"blank_node{term}"

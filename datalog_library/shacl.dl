@@ -240,7 +240,7 @@ language_in_constr(shape) :- value_node(shape, fnode), language(fnode, lang),
 // The property sh:uniqueLang can be set to true to specify that no pair of value nodes may use the same language tag.
 .decl unique_lang_constr(shape:symbol)
 unique_lang_constr(shape) :- value_node(shape, fnode1), value_node(shape, fnode2),
-                             lang1 = language(fnode1), lang2 = language(fnode2),
+                             language(fnode1, lang1), language(fnode2, lang2),
                              !(fnode1 != fnode2, lang1 = lang2).
 
 
